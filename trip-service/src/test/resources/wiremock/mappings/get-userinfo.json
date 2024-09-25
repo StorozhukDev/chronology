@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/v1/userinfo/.*"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "userinfo-response.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

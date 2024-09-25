@@ -1,0 +1,33 @@
+server.port: 8082
+app.version: '@project.version@'
+spring.application.name: 'trip-service'
+
+# Common Spring configuration
+spring:
+  datasource:
+    url: ${TRIP_DB_URL}
+    username: ${TRIP_DB_USERNAME}
+    password: ${TRIP_DB_PASSWORD}
+  liquibase:
+    change-log: classpath:db/root.changelog.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+# jwt-auth-starter configuration
+jwt:
+  auth:
+    starter:
+      token:
+        secretKey: ${JWT_SECRET}
+      auth-service:
+        url: ${AUTH_SERVICE_URL}
+
+# Swagger configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
