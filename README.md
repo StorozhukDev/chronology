@@ -94,9 +94,9 @@ graph TD
     UserFacade -->|save/get| UserService
     RoleService -->|JPA| RoleRepository
     UserFacade -->|get| RoleService
-    UserFacade -->|save/get| SpcialProviderService
+    UserFacade -->|save/get| SocialProviderService
     UserService -->|JPA| UserRepository
-    SpcialProviderService -->|JPA| SocialProviderRepository
+    SocialProviderService -->|JPA| SocialProviderRepository
     AuthService -->|generate tokens| TokenFacade
     TokenFacade -->|generate| JwtTokenProvider
     TokenFacade -->|save| RefreshTokenService
