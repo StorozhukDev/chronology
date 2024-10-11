@@ -83,6 +83,29 @@ http://localhost:8081/oauth2/authorization/google
 
 ## Diagrams
 
+#### Architecture Diagram
+
+```mermaid
+flowchart TD
+    ClientBrowser --> WebUI[WebUI]
+    WebUI -->|HTTPS REST API| TripServiceAPI[Trip Service API]
+    TripServiceAPI -->|Reads/Writes| TripDatabase[(Trip Service DB)]
+    
+    WebUI -->|HTTPS REST API| AuthServiceAPI[Auth Service API]
+    AuthServiceAPI -->|Reads/Writes| AuthDatabase[(Auth Service DB)]
+    GoogleOAuth -->|Provides OAuth2| AuthServiceAPI
+    AuthServiceAPI --->|Authenticates via| GoogleOAuth[Google OAuth2]
+    
+
+    classDef microservice fill:#66bb6a,stroke:#000000
+    classDef database fill:#ccffff,stroke:#000000
+    classDef external fill:#3399ff,stroke:#000000
+
+    class TripServiceAPI,AuthServiceAPI microservice
+    class TripDatabase,AuthDatabase database
+    class GoogleOAuth external
+```
+
 #### Component Diagram - auth-service
 
 ``` mermaid
