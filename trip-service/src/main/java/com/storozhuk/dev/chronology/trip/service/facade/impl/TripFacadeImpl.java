@@ -50,11 +50,32 @@ public class TripFacadeImpl implements TripFacade {
     tripEntity.setCreatedBy(userId);
     tripEntity.setPlaces(places);
 
+    // Handle shared users
+    Set<TripSharedUserEntity> sharedUsers = new HashSet<>();
+
+    // Add the owner
+    TripSharedUserEntity owner = new TripSharedUserEntity();
+    owner.setTrip(tripEntity);
+    owner.setUserId(userId);
+    owner.setRole(ROLE_OWNER);
+    sharedUsers.add(owner);
+
+    // Add shared users
+    if (!CollectionUtils.isEmpty(tripRequestDto.sharedUserIds())) {
+      for (UUID sharedUserId : tripRequestDto.sharedUserIds()) {
+        if (sharedUserId.equals(userId)) continue;
+        TripSharedUserEntity sharedUser = new TripSharedUserEntity();
+        sharedUser.setTrip(tripEntity);
+        sharedUser.setUserId(sharedUserId);
+        sharedUser.setRole(ROLE_VIEWER);
+        sharedUsers.add(sharedUser);
+      }
+    }
+
+    tripEntity.setSharedUsers(sharedUsers);
+
     // Save trip
     TripEntity savedTrip = tripService.saveTrip(tripEntity);
-
-    // Handle shared users
-    handleSharedUsers(savedTrip, userId, tripRequestDto.sharedUserIds());
 
     return tripMapper.toTripResponseDto(savedTrip);
   }
@@ -88,15 +109,15 @@ public class TripFacadeImpl implements TripFacade {
       tripEntity.setPlaces(places);
     }
 
-    // Save updated trip
-    tripService.saveTrip(tripEntity);
-
     // Update shared users
     if (nonNull(tripRequestDto.sharedUserIds())) {
       updateSharedUsers(tripEntity, userId, tripRequestDto.sharedUserIds());
     }
 
-    return tripMapper.toTripResponseDto(tripEntity);
+    // Save updated trip
+    TripEntity updatedTrip = tripService.saveTrip(tripEntity);
+
+    return tripMapper.toTripResponseDto(updatedTrip);
   }
 
   @Override
@@ -147,11 +168,25 @@ public class TripFacadeImpl implements TripFacade {
    * @param sharedUserIds New set of user IDs to share the trip with
    */
   private void updateSharedUsers(TripEntity trip, UUID ownerId, Set<UUID> sharedUserIds) {
-    // Remove existing shared users except the owner
-    tripSharedUserRepository.deleteByTripAndUserIdNot(trip, ownerId);
+    Set<TripSharedUserEntity> sharedUsers = trip.getSharedUsers();
 
-    // Handle shared users
-    handleSharedUsers(trip, ownerId, sharedUserIds);
+    // Retain only the owner
+    sharedUsers.removeIf(su -> !su.getUserId().equals(ownerId));
+
+    // Re-add shared users
+    if (!CollectionUtils.isEmpty(sharedUserIds)) {
+      for (UUID userId : sharedUserIds) {
+        if (userId.equals(ownerId)) continue;
+        boolean alreadyShared = sharedUsers.stream().anyMatch(su -> su.getUserId().equals(userId));
+        if (!alreadyShared) {
+          TripSharedUserEntity sharedUser = new TripSharedUserEntity();
+          sharedUser.setTrip(trip);
+          sharedUser.setUserId(userId);
+          sharedUser.setRole(ROLE_VIEWER);
+          sharedUsers.add(sharedUser);
+        }
+      }
+    }
   }
 
   /**
