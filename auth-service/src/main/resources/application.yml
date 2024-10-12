@@ -26,6 +26,9 @@ spring.security.oauth2.client:
         - email
         - profile
 
+oauth:
+  redirect-uri: http://localhost:3000/oauth2/redirect
+
 # JWT Configuration
 jwt:
   secretKey: ${JWT_SECRET}

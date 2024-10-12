@@ -1,8 +1,6 @@
 package com.storozhuk.dev.chronology.auth.config.security;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.storozhuk.dev.chronology.auth.config.properties.OauthProperties;
 import com.storozhuk.dev.chronology.auth.dto.api.OAuth2UserData;
 import com.storozhuk.dev.chronology.auth.dto.api.response.AuthResponseDto;
 import com.storozhuk.dev.chronology.auth.entity.UserEntity;
@@ -14,6 +12,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-  private final ObjectMapper objectMapper;
+  private final OauthProperties oauthProperties;
   private final TokenFacade tokenFacade;
   private final UserFacade userFacade;
   private Map<String, OAuth2UserMapper> oAuth2UserMappers;
@@ -81,8 +81,11 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
     AuthResponseDto authResponse = tokenFacade.generateTokenPair(userEntity);
 
-    response.setContentType(APPLICATION_JSON_VALUE);
-    response.getWriter().write(objectMapper.writeValueAsString(authResponse));
+    String targetUrl =
+        oauthProperties.redirectUri()
+            + "?token="
+            + URLEncoder.encode(authResponse.accessToken(), StandardCharsets.UTF_8);
+    response.sendRedirect(targetUrl);
   }
 
   /** Functional interface for mapping OAuth2 user data. */
