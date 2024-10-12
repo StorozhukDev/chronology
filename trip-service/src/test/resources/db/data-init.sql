@@ -1,8 +1,8 @@
-INSERT INTO places (id, name, country, description)
-VALUES ('11111111-1111-1111-1111-111111111111', 'Eiffel Tower', 'France', 'An iconic symbol of Paris.'),
-       ('22222222-2222-2222-2222-222222222222', 'Louvre Museum', 'France', 'Worlds largest art museum.'),
-       ('33333333-3333-3333-3333-333333333333', 'Statue of Liberty', 'USA', 'Iconic symbol of freedom.'),
-       ('44444444-4444-4444-4444-444444444444', 'Great Wall of China', 'China', 'Historic fortification.');
+INSERT INTO places (id, name, country, description, latitude, longitude)
+VALUES ('11111111-1111-1111-1111-111111111111', 'Eiffel Tower', 'France', 'An iconic symbol of Paris.', 48.8584, 2.2945),
+       ('22222222-2222-2222-2222-222222222222', 'Louvre Museum', 'France', 'Worlds largest art museum.', 48.8606, 2.3376),
+       ('33333333-3333-3333-3333-333333333333', 'Statue of Liberty', 'USA', 'Iconic symbol of freedom.', 40.6892, -74.0445),
+       ('44444444-4444-4444-4444-444444444444', 'Great Wall of China', 'China', 'Historic fortification.', NULL, NULL);
 
 INSERT INTO trips (id, name, start_date, end_date, created_by)
 VALUES ('11111111-1111-1111-1111-111111111111', 'Paris Vacation', '2023-12-01 00:00:00+00', '2023-12-07 00:00:00+00',

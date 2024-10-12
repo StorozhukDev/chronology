@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +34,10 @@ public class PlaceEntity {
   private String country;
 
   private String description;
+
+  private BigDecimal latitude;
+
+  private BigDecimal longitude;
 
   @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<PhotoEntity> photos = new HashSet<>();

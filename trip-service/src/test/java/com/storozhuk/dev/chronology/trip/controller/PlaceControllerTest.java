@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.storozhuk.dev.chronology.trip.AbstractComponentTest;
 import com.storozhuk.dev.chronology.trip.dto.api.request.PhotoRequestDto;
 import com.storozhuk.dev.chronology.trip.dto.api.request.PlaceRequestDto;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,8 @@ public class PlaceControllerTest extends AbstractComponentTest {
   @Test
   public void testCreatePlace_201_Success() throws Exception {
     PlaceRequestDto placeRequest =
-        new PlaceRequestDto("Notre Dame Cathedral", "France", "Historical cathedral in Paris");
+        new PlaceRequestDto(
+            "Notre Dame Cathedral", "France", "Historical cathedral in Paris", null, null);
 
     mockMvc
         .perform(
@@ -49,9 +51,48 @@ public class PlaceControllerTest extends AbstractComponentTest {
   }
 
   @Test
+  public void testCreatePlace_201_CoordinatesOptional() throws Exception {
+    PlaceRequestDto placeRequest =
+        new PlaceRequestDto("New Place", "Some Country", "Some Description", null, null);
+
+    mockMvc
+        .perform(
+            post("/api/v1/places")
+                .with(bearerToken(accessToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(placeRequest)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.name").value("New Place"))
+        .andExpect(jsonPath("$.latitude").doesNotExist())
+        .andExpect(jsonPath("$.longitude").doesNotExist());
+  }
+
+  @Test
+  public void testCreatePlace_201_WithCoordinates() throws Exception {
+    PlaceRequestDto placeRequest =
+        new PlaceRequestDto(
+            "New Place with Coordinates",
+            "Some Country",
+            "Some Description",
+            new BigDecimal("12.34"),
+            new BigDecimal("56.78"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/places")
+                .with(bearerToken(accessToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(placeRequest)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.name").value("New Place with Coordinates"))
+        .andExpect(jsonPath("$.latitude").value(12.34))
+        .andExpect(jsonPath("$.longitude").value(56.78));
+  }
+
+  @Test
   public void testCreatePlace_400_NameNull() throws Exception {
     PlaceRequestDto placeRequest =
-        new PlaceRequestDto(null, "France", "Historical cathedral in Paris");
+        new PlaceRequestDto(null, "France", "Historical cathedral in Paris", null, null);
 
     mockMvc
         .perform(
@@ -67,7 +108,8 @@ public class PlaceControllerTest extends AbstractComponentTest {
   @Test
   public void testCreatePlace_400_CountryNull() throws Exception {
     PlaceRequestDto placeRequest =
-        new PlaceRequestDto("Notre Dame Cathedral", null, "Historical cathedral in Paris");
+        new PlaceRequestDto(
+            "Notre Dame Cathedral", null, "Historical cathedral in Paris", null, null);
 
     mockMvc
         .perform(
@@ -83,7 +125,7 @@ public class PlaceControllerTest extends AbstractComponentTest {
   @Test
   public void testUpdatePlace_200_Success() throws Exception {
     PlaceRequestDto placeRequest =
-        new PlaceRequestDto("Updated Name", "France", "Updated Description");
+        new PlaceRequestDto("Updated Name", "France", "Updated Description", null, null);
 
     mockMvc
         .perform(

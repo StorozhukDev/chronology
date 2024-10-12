@@ -37,7 +37,8 @@ public class PlaceMapperTest {
   @Test
   public void testToPlaceEntity() {
     // Given
-    PlaceRequestDto requestDto = new PlaceRequestDto("Louvre Museum", "France", "Famous museum");
+    PlaceRequestDto requestDto =
+        new PlaceRequestDto("Louvre Museum", "France", "Famous museum", null, null);
 
     // When
     PlaceEntity placeEntity = mapper.toPlaceEntity(requestDto);
@@ -57,7 +58,8 @@ public class PlaceMapperTest {
     placeEntity.setCountry("Old Country");
     placeEntity.setDescription("Old Description");
 
-    PlaceRequestDto requestDto = new PlaceRequestDto("New Name", null, "New Description");
+    PlaceRequestDto requestDto =
+        new PlaceRequestDto("New Name", null, "New Description", null, null);
 
     // When
     mapper.updatePlaceEntityFromDto(requestDto, placeEntity);
