@@ -6,6 +6,6 @@ target/
 *.iml
 *.ipr
 
-### Project customis ###
+### Project customs ###
 **/.env
 **/application-default.yml
