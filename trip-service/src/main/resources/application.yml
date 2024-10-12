@@ -14,6 +14,11 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 100
 
 # jwt-auth-starter configuration
 jwt:
