@@ -29,6 +29,9 @@ jwt:
       auth-service:
         url: ${AUTH_SERVICE_URL}
 
+cors:
+  origins: ${CORS_ORIGINS}
+
 # Swagger configuration
 springdoc:
   api-docs:

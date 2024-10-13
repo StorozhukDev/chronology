@@ -27,7 +27,10 @@ spring.security.oauth2.client:
         - profile
 
 oauth:
-  redirect-uri: http://localhost:3000/oauth2/redirect
+  redirect-uri: ${OAUTH_REDIRECT_URI}
+
+cors:
+  origins: ${CORS_ORIGINS}
 
 # JWT Configuration
 jwt:
