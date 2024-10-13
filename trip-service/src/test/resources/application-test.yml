@@ -1,0 +1,14 @@
+server:
+  port: 0
+
+spring:
+  jpa:
+    show-sql: true
+
+jwt:
+  auth:
+    starter:
+      token:
+        secretKey: 206876e12d717250ed0cac603a8e3458dfd9d0076642268efa3fb86f4b55e9f9
+      auth-service:
+        url: http://localhost:0
