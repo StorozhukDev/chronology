@@ -12,7 +12,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +22,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /** Handles successful OAuth2 authentication and token generation. */
 @Component
@@ -82,9 +82,13 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     AuthResponseDto authResponse = tokenFacade.generateTokenPair(userEntity);
 
     String targetUrl =
-        oauthProperties.redirectUri()
-            + "?token="
-            + URLEncoder.encode(authResponse.accessToken(), StandardCharsets.UTF_8);
+        UriComponentsBuilder.fromUriString(oauthProperties.redirectUri())
+            .queryParam("accessToken", authResponse.accessToken())
+            .queryParam("refreshToken", authResponse.refreshToken())
+            .queryParam("expiresIn", authResponse.expiresIn())
+            .encode(StandardCharsets.UTF_8)
+            .build()
+            .toUriString();
     response.sendRedirect(targetUrl);
   }
 
