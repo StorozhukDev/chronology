@@ -7,6 +7,9 @@ import com.storozhuk.dev.chronology.exception.handler.exception.NotFoundExceptio
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,5 +40,18 @@ public class UserServiceImpl implements UserService {
     return userRepository
         .findById(userId)
         .orElseThrow(() -> new NotFoundException("User not found with id: %s".formatted(userId)));
+  }
+
+  @Override
+  public Page<UserEntity> searchUsers(String searchString, Pageable pageable) {
+    Specification<UserEntity> specification =
+        (root, query, criteriaBuilder) -> {
+          String likePattern = "%" + searchString.toLowerCase() + "%";
+          return criteriaBuilder.or(
+              criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), likePattern),
+              criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), likePattern));
+        };
+
+    return userRepository.findAll(specification, pageable);
   }
 }

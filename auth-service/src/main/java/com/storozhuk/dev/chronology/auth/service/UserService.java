@@ -4,6 +4,8 @@ import com.storozhuk.dev.chronology.auth.entity.UserEntity;
 import com.storozhuk.dev.chronology.exception.handler.exception.NotFoundException;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /** Service interface for managing user entities. */
 public interface UserService {
@@ -41,4 +43,13 @@ public interface UserService {
    * @throws NotFoundException if the user is not found
    */
   UserEntity getById(UUID userId);
+
+  /**
+   * Searches for users by a search string in email or name fields with pagination.
+   *
+   * @param searchString the string to search for in email or name.
+   * @param pageable the pagination information.
+   * @return a {@link Page} of {@link UserEntity}.
+   */
+  Page<UserEntity> searchUsers(String searchString, Pageable pageable);
 }

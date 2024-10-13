@@ -9,6 +9,8 @@ import com.storozhuk.dev.chronology.lib.dto.UserInfoDto;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,5 +35,11 @@ public class UserInfoServiceImpl implements UserInfoService {
             .filter(UserEntity::isEnabled)
             .orElseThrow(() -> new AccessDeniedException("Account disabled"));
     return userMapper.toUserInfoDto(userEntity);
+  }
+
+  @Override
+  public Page<UserInfoDto> searchUsers(String searchString, Pageable pageable) {
+    Page<UserEntity> userEntities = userService.searchUsers(searchString, pageable);
+    return userEntities.map(userMapper::toUserInfoDto);
   }
 }

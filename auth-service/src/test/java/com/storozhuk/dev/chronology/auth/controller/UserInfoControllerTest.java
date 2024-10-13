@@ -149,4 +149,60 @@ public class UserInfoControllerTest extends AbstractComponentTest {
         .andExpect(jsonPath("$.violations", hasSize(1)))
         .andExpect(jsonPath("$.violations[0].details").value("Account disabled"));
   }
+
+  @Test
+  public void testSearchUsers_200_Success() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/v1/userinfo/search")
+                .param("searchString", "testuser")
+                .header(AUTHORIZATION, "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].email").value("testuser@example.com"))
+        .andExpect(jsonPath("$.content[0].name").value("Test User with password Password123"))
+        .andExpect(jsonPath("$.content[0].roles", hasItem("USER")));
+  }
+
+  @Test
+  public void testSearchUsers_200_NoResults() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/v1/userinfo/search")
+                .param("searchString", "nonexistent")
+                .header(AUTHORIZATION, "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isEmpty());
+  }
+
+  @Test
+  public void testSearchUsers_400_MissingSearchString() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/v1/userinfo/search")
+                .header(AUTHORIZATION, "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errorCode").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.description").value("Bad request"))
+        .andExpect(jsonPath("$.violations", hasSize(1)))
+        .andExpect(jsonPath("$.violations[0].field").value("searchString"))
+        .andExpect(jsonPath("$.violations[0].violation").value("Parameter is missing"))
+        .andExpect(
+            jsonPath("$.violations[0].details")
+                .value(
+                    "Required request parameter 'searchString' for method parameter type String is not present"));
+  }
+
+  @Test
+  public void testSearchUsers_401_Unauthorized() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/v1/userinfo/search")
+                .param("searchString", "testuser")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$").doesNotExist());
+  }
 }
