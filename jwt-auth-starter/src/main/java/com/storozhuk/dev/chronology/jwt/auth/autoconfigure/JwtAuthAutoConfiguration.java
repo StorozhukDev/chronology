@@ -1,6 +1,7 @@
 package com.storozhuk.dev.chronology.jwt.auth.autoconfigure;
 
 import com.storozhuk.dev.chronology.jwt.auth.client.AuthServiceFeignClient;
+import com.storozhuk.dev.chronology.jwt.auth.config.properties.AuthProperties;
 import com.storozhuk.dev.chronology.jwt.auth.config.properties.JwtProperties;
 import com.storozhuk.dev.chronology.jwt.auth.filter.JwtAuthenticationFilter;
 import com.storozhuk.dev.chronology.jwt.auth.service.JwtTokenParser;
@@ -29,8 +30,10 @@ public class JwtAuthAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public JwtAuthenticationFilter jwtAuthenticationFilter(
-      JwtTokenParser jwtTokenProvider, AuthServiceFeignClient authServiceFeignClient) {
-    return new JwtAuthenticationFilter(jwtTokenProvider, authServiceFeignClient);
+      AuthProperties authProperties,
+      JwtTokenParser jwtTokenProvider,
+      AuthServiceFeignClient authServiceFeignClient) {
+    return new JwtAuthenticationFilter(authProperties, jwtTokenProvider, authServiceFeignClient);
   }
 
   @Bean

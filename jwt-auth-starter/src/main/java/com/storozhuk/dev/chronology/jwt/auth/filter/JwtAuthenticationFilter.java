@@ -4,6 +4,7 @@ import static com.storozhuk.dev.chronology.lib.util.AuthConstant.AUTHORIZATION;
 import static com.storozhuk.dev.chronology.lib.util.AuthConstant.BEARER_PREFIX;
 
 import com.storozhuk.dev.chronology.jwt.auth.client.AuthServiceFeignClient;
+import com.storozhuk.dev.chronology.jwt.auth.config.properties.AuthProperties;
 import com.storozhuk.dev.chronology.jwt.auth.service.JwtTokenParser;
 import com.storozhuk.dev.chronology.lib.dto.UserInfoDto;
 import jakarta.servlet.FilterChain;
@@ -24,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+  private final AuthProperties authProperties;
   private final JwtTokenParser jwtTokenParser;
   private final AuthServiceFeignClient authServiceFeignClient;
 
@@ -37,15 +39,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String jwt = resolveToken(authorizationHeader);
     if (StringUtils.hasText(jwt) && jwtTokenParser.isValidToken(jwt)) {
       String userId = jwtTokenParser.getUserIdFromJWT(jwt);
-      UserInfoDto userDto = authServiceFeignClient.getUserById(authorizationHeader, userId);
-      UsernamePasswordAuthenticationToken authentication =
-          new UsernamePasswordAuthenticationToken(
-              userDto.id(),
-              null,
-              userDto.roles().stream().map(SimpleGrantedAuthority::new).toList());
-      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      if (authProperties.stateless()) {
+        setAuthenticationFromToken(jwt, userId, request);
+      } else {
+        setAuthenticationFromUserInfo(authorizationHeader, userId, request);
+      }
     }
     filterChain.doFilter(request, response);
   }
@@ -55,5 +53,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         .filter(bearer -> bearer.startsWith(BEARER_PREFIX))
         .map(bearer -> bearer.substring(7))
         .orElse(null);
+  }
+
+  private void setAuthenticationFromToken(String jwt, String userId, HttpServletRequest request) {
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(
+            userId,
+            null,
+            jwtTokenParser.getRolesFromJWT(jwt).stream().map(SimpleGrantedAuthority::new).toList());
+
+    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+  }
+
+  private void setAuthenticationFromUserInfo(
+      String authorizationHeader, String userId, HttpServletRequest request) {
+    UserInfoDto userDto = authServiceFeignClient.getUserById(authorizationHeader, userId);
+
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(
+            userDto.id(), null, userDto.roles().stream().map(SimpleGrantedAuthority::new).toList());
+
+    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 }
