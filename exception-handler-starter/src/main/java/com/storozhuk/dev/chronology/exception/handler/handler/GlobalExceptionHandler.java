@@ -17,6 +17,7 @@ import org.springframework.util.MimeType;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -72,6 +73,20 @@ public class GlobalExceptionHandler {
                         .build())
             .toList();
     return buildResponseEntity(ErrorCode.VALIDATION_FAILED, HttpStatus.BAD_REQUEST, violations);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorDto> handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException ex) {
+    log.warn("Missing request parameter", ex);
+    List<ViolationDto> violations =
+        List.of(
+            ViolationDto.builder()
+                .field(ex.getParameterName())
+                .violation("Parameter is missing")
+                .details(ex.getMessage())
+                .build());
+    return buildResponseEntity(ErrorCode.BAD_REQUEST, HttpStatus.BAD_REQUEST, violations);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
